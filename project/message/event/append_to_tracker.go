@@ -6,7 +6,7 @@ import (
 	"github.com/wesen/three-dots-go-driven-training/project/entities"
 )
 
-func (h Handler) AppendToTracker(ctx context.Context, event entities.TicketBookingConfirmed) error {
+func (h Handler) AppendToTracker(ctx context.Context, event *entities.TicketBookingConfirmed) error {
 	log.FromContext(ctx).Infof("Appending booking to tracker: %v", event)
 
 	return h.spreadsheetsService.AppendRow(ctx, "tickets-to-print", []string{

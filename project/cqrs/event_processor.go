@@ -11,7 +11,6 @@ import (
 func NewEventProcessor(
 	router *message.Router,
 	rdb *redis.Client,
-	marshaler cqrs.CommandEventMarshaler,
 	logger watermill.LoggerAdapter,
 	handlers []cqrs.EventHandler,
 ) (*cqrs.EventProcessor, error) {

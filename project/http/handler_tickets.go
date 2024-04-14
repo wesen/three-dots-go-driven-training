@@ -1,14 +1,12 @@
 package ticketsHttp
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 	"github.com/wesen/three-dots-go-driven-training/project/entities"
 	"net/http"
-
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/labstack/echo/v4"
+	"os"
 )
 
 type ticketsStatusRequest struct {
@@ -24,12 +22,14 @@ type ticketStatusRequest struct {
 }
 
 func (h Handler) PostTicketsStatus(c echo.Context) error {
+	fmt.Fprintf(os.Stderr, "Publishing Ticket\n\n")
 	var request ticketsStatusRequest
 	err := c.Bind(&request)
 	if err != nil {
 		return err
 	}
 
+	fmt.Fprintf(os.Stderr, "Received tickets status request: %+v\n", request)
 	for _, ticket := range request.Tickets {
 		if ticket.Status == "confirmed" {
 			event := entities.TicketBookingConfirmed{
@@ -39,16 +39,8 @@ func (h Handler) PostTicketsStatus(c echo.Context) error {
 				Price:         ticket.Price,
 			}
 
-			payload, err := json.Marshal(event)
-			if err != nil {
-				return err
-			}
-
-			msg := message.NewMessage(watermill.NewUUID(), payload)
-			msg.Metadata.Set("correlation_id", c.Request().Header.Get("Correlation-ID"))
-			msg.Metadata.Set("type", "TicketBookingConfirmed")
-
-			err = h.publisher.Publish("TicketBookingConfirmed", msg)
+			log.Info("Publishing TicketBookingConfirmed event")
+			err = h.eventBus.Publish(c.Request().Context(), event)
 			if err != nil {
 				return err
 			}
@@ -60,16 +52,8 @@ func (h Handler) PostTicketsStatus(c echo.Context) error {
 				Price:         ticket.Price,
 			}
 
-			payload, err := json.Marshal(event)
-			if err != nil {
-				return err
-			}
-
-			msg := message.NewMessage(watermill.NewUUID(), payload)
-			msg.Metadata.Set("correlation_id", c.Request().Header.Get("Correlation-ID"))
-			msg.Metadata.Set("type", "TicketBookingCanceled")
-
-			err = h.publisher.Publish("TicketBookingCanceled", msg)
+			log.Info("Publishing TicketBookingConfirmed event")
+			err = h.eventBus.Publish(c.Request().Context(), event)
 			if err != nil {
 				return err
 			}

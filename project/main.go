@@ -34,11 +34,16 @@ func main() {
 	spreadsheetsService := api.NewSpreadsheetsClient(apiClients)
 	receiptsService := api.NewReceiptsClient(apiClients)
 
-	err = service.New(
+	svc, err := service.New(
 		redisClient,
 		spreadsheetsService,
 		receiptsService,
-	).Run(ctx)
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	err = svc.Run(ctx)
 	if err != nil {
 		panic(err)
 	}

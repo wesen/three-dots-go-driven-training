@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
+	project_cqrs "github.com/wesen/three-dots-go-driven-training/project/cqrs"
 	ticketsHttp "github.com/wesen/three-dots-go-driven-training/project/http"
 	"github.com/wesen/three-dots-go-driven-training/project/message"
 	"github.com/wesen/three-dots-go-driven-training/project/message/event"
@@ -15,7 +16,7 @@ import (
 )
 
 func init() {
-	log.Init(logrus.InfoLevel)
+	log.Init(logrus.TraceLevel)
 }
 
 type Service struct {
@@ -24,32 +25,40 @@ type Service struct {
 }
 
 func New(
-	redisClient *redis.Client,
+	rdb *redis.Client,
 	spreadsheetsService event.SpreadsheetsAPI,
 	receiptsService event.ReceiptsService,
-) Service {
+) (Service, error) {
 	watermillLogger := log.NewWatermill(log.FromContext(context.Background()))
 
 	var redisPublisher watermillMessage.Publisher
-	redisPublisher = message.NewRedisPublisher(redisClient, watermillLogger)
+	redisPublisher = message.NewRedisPublisher(rdb, watermillLogger)
 	redisPublisher = log.CorrelationPublisherDecorator{Publisher: redisPublisher}
 
-	watermillRouter := message.NewWatermillRouter(
+	eventBus, err := project_cqrs.NewEventBus(redisPublisher)
+	if err != nil {
+		return Service{}, err
+	}
+
+	watermillRouter, err := message.NewEventProcessor(
 		receiptsService,
 		spreadsheetsService,
-		redisClient,
+		rdb,
 		watermillLogger,
 	)
+	if err != nil {
+		return Service{}, err
+	}
 
 	echoRouter := ticketsHttp.NewHttpRouter(
-		redisPublisher,
+		eventBus,
 		spreadsheetsService,
 	)
 
 	return Service{
 		watermillRouter: watermillRouter,
 		echoRouter:      echoRouter,
-	}
+	}, nil
 }
 
 func (s Service) Run(
