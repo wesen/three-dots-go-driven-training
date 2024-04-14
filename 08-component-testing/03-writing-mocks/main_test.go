@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
+	"tickets/entities"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -18,7 +19,7 @@ func TestReceiptsServiceMock(t *testing.T) {
 
 	req1 := IssueReceiptRequest{
 		TicketID: uuid.NewString(),
-		Price: Money{
+		Price: entities.Money{
 			Amount:   fmt.Sprintf("%d", rand.Intn(10)+1),
 			Currency: "EUR",
 		},
@@ -30,7 +31,7 @@ func TestReceiptsServiceMock(t *testing.T) {
 
 	req2 := IssueReceiptRequest{
 		TicketID: uuid.NewString(),
-		Price: Money{
+		Price: entities.Money{
 			Amount:   fmt.Sprintf("%d", rand.Intn(10)+1),
 			Currency: "EUR",
 		},

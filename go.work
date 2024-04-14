@@ -1,0 +1,9 @@
+go 1.21.5
+
+use ./project
+use 09-cqrs-events/01-event-bus
+use 09-cqrs-events/02-custom-event-name
+use 09-cqrs-events/03-handling-correlation-id
+use 09-cqrs-events/04-event-processor
+use 09-cqrs-events/05-event-handler
+use 09-cqrs-events/06-cqrs-with-consumer-groups

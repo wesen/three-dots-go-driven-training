@@ -1,6 +1,6 @@
-package helpers
+package entities
 
-type Price struct {
+type Money struct {
 	Amount   string `json:"amount"`
 	Currency string `json:"currency"`
 }

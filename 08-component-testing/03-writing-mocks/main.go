@@ -3,18 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/wesen/three-dots-go-driven-training/project/entities"
 	"sync"
 	"time"
 )
 
 type IssueReceiptRequest struct {
-	TicketID string `json:"ticket_id"`
-	Price    Money  `json:"price"`
-}
-
-type Money struct {
-	Amount   string `json:"amount"`
-	Currency string `json:"currency"`
+	TicketID string         `json:"ticket_id"`
+	Price    entities.Money `json:"price"`
 }
 
 type IssueReceiptResponse struct {
