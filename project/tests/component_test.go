@@ -29,11 +29,12 @@ func TestComponent(t *testing.T) {
 	receiptsService := &mocks.ReceiptsServiceMock{}
 
 	go func() {
-		svc := service.New(
+		svc, err := service.New(
 			redisClient,
 			spreadsheetsService,
 			receiptsService,
 		)
+		require.NoError(t, err)
 		assert.NoError(t, svc.Run(ctx))
 	}()
 

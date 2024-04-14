@@ -24,7 +24,7 @@ func NewEventProcessor(
 				return redisstream.NewSubscriber(
 					redisstream.SubscriberConfig{
 						Client:        rdb,
-						ConsumerGroup: "svc-users." + params.HandlerName,
+						ConsumerGroup: "svc-tickets." + params.HandlerName,
 					}, logger,
 				)
 			},

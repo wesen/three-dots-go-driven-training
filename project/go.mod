@@ -1,9 +1,11 @@
 module github.com/wesen/three-dots-go-driven-training/project
 
-go 1.20
+go 1.21
+
+toolchain go1.22.2
 
 require (
-	github.com/ThreeDotsLabs/go-event-driven v0.0.11
+	github.com/ThreeDotsLabs/go-event-driven v0.0.12
 	github.com/ThreeDotsLabs/watermill v1.3.2
 	github.com/ThreeDotsLabs/watermill-redisstream v1.2.2
 	github.com/labstack/echo/v4 v4.10.2
