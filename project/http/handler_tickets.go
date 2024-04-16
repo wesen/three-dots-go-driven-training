@@ -2,11 +2,11 @@ package ticketsHttp
 
 import (
 	"fmt"
+	"github.com/ThreeDotsLabs/go-event-driven/common/log"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
+	"github.com/sirupsen/logrus"
 	"github.com/wesen/three-dots-go-driven-training/project/entities"
 	"net/http"
-	"os"
 )
 
 type ticketsStatusRequest struct {
@@ -21,39 +21,56 @@ type ticketStatusRequest struct {
 	BookingID     string         `json:"booking_id"`
 }
 
+func (h Handler) GetTickets(c echo.Context) error {
+	tickets, err := h.ticketRepository.GetTickets(c.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	log.FromContext(c.Request().Context()).
+		WithFields(logrus.Fields{"tickets": tickets}).
+		Infof("Found %d tickets", len(tickets))
+
+	return c.JSON(http.StatusOK, tickets)
+}
+
 func (h Handler) PostTicketsStatus(c echo.Context) error {
-	fmt.Fprintf(os.Stderr, "Publishing Ticket\n\n")
 	var request ticketsStatusRequest
 	err := c.Bind(&request)
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(os.Stderr, "Received tickets status request: %+v\n", request)
+	// get Idempotency-Key header
+	idempotencyKey := c.Request().Header.Get("Idempotency-Key")
+	if idempotencyKey == "" {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
 	for _, ticket := range request.Tickets {
+		ticketIdempotencyKey := fmt.Sprintf("%s-%s", idempotencyKey, ticket.TicketID)
+
 		if ticket.Status == "confirmed" {
-			event := entities.TicketBookingConfirmed{
-				Header:        entities.NewEventHeader(),
+			event_ := entities.TicketBookingConfirmed{
+				Header:        entities.NewEventHeader(entities.WithIdempotencyKey(ticketIdempotencyKey)),
 				TicketID:      ticket.TicketID,
 				CustomerEmail: ticket.CustomerEmail,
 				Price:         ticket.Price,
 			}
 
-			log.Info("Publishing TicketBookingConfirmed event")
-			err = h.eventBus.Publish(c.Request().Context(), event)
+			err = h.eventBus.Publish(c.Request().Context(), event_)
 			if err != nil {
 				return err
 			}
 		} else if ticket.Status == "canceled" {
-			event := entities.TicketBookingCanceled{
-				Header:        entities.NewEventHeader(),
+			event_ := entities.TicketBookingCanceled{
+				Header:        entities.NewEventHeader(entities.WithIdempotencyKey(ticketIdempotencyKey)),
 				TicketID:      ticket.TicketID,
 				CustomerEmail: ticket.CustomerEmail,
 				Price:         ticket.Price,
 			}
 
-			log.Info("Publishing TicketBookingConfirmed event")
-			err = h.eventBus.Publish(c.Request().Context(), event)
+			err = h.eventBus.Publish(c.Request().Context(), event_)
 			if err != nil {
 				return err
 			}

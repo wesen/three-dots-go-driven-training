@@ -9,17 +9,13 @@ import (
 	"github.com/wesen/three-dots-go-driven-training/project/message/event"
 )
 
-const brokenMessageID = "2b3d3b3b-3b3b-3b3b-3b3b-3b3b3b3b3b3b"
-
-func NewEventProcessor(receiptsService event.ReceiptsService, spreadsheetsService event.SpreadsheetsAPI, rdb *redis.Client, watermillLogger watermill.LoggerAdapter) (*message.Router, error) {
+func NewEventProcessor(handler event.Handler, rdb *redis.Client, watermillLogger watermill.LoggerAdapter) (*message.Router, error) {
 	router, err := message.NewRouter(message.RouterConfig{}, watermillLogger)
 	if err != nil {
 		panic(err)
 	}
 
 	useMiddlewares(router, watermillLogger)
-
-	handler := event.NewHandler(spreadsheetsService, receiptsService)
 
 	handlers := []cqrs.EventHandler{
 		cqrs.NewEventHandler(
@@ -33,6 +29,23 @@ func NewEventProcessor(receiptsService event.ReceiptsService, spreadsheetsServic
 		cqrs.NewEventHandler(
 			"TicketRefundToSheet",
 			handler.TicketRefundToSheet,
+		),
+		cqrs.NewEventHandler(
+			"StoreTicket",
+			handler.StoreTicket,
+		),
+		cqrs.NewEventHandler(
+			"DeleteTicket",
+			handler.DeleteTicket,
+		),
+		cqrs.NewEventHandler(
+			"PrintTicket",
+			handler.PrintTicket,
+		),
+
+		cqrs.NewEventHandler(
+			"BookOnDeadNation",
+			handler.BookOnDeadNation,
 		),
 	}
 

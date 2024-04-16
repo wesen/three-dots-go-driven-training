@@ -7,3 +7,8 @@ use 09-cqrs-events/03-handling-correlation-id
 use 09-cqrs-events/04-event-processor
 use 09-cqrs-events/05-event-handler
 use 09-cqrs-events/06-cqrs-with-consumer-groups
+use 11-outbox/04-publishing-event-in-transaction
+use 11-outbox/05-subscribing-from-sql
+use 11-outbox/06-publishing-event-for-forwarder
+use 11-outbox/07-forwarding-with-outbox
+use 12-cqrs-commands/01-command-vs-event

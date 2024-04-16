@@ -47,8 +47,6 @@ func useMiddlewares(router *message.Router, watermillLogger watermill.LoggerAdap
 				"metadata":   msg.Metadata,
 			})
 
-			logger.Info("Handling a message")
-
 			msgs, err := next(msg)
 			if err != nil {
 				logger.WithError(err).Error("Message handling error")
